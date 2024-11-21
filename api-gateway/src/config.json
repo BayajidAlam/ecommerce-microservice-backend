@@ -89,6 +89,26 @@
           "middlewares": []
         }
       ]
+    },
+    "order": {
+      "url": "http://localhost:4007",
+      "routes": [
+        {
+          "path": "/orders/checkout",
+          "methods": ["post"],
+          "middlewares": []
+        },
+        {
+          "path": "/orders/:id",
+          "methods": ["get"],
+          "middlewares": []
+        },
+        {
+          "path": "/orders",
+          "methods": ["get"],
+          "middlewares": []
+        }
+      ]
     }
   }
 }
