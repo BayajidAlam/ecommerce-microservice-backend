@@ -6,63 +6,74 @@ services:
     container_name: postgres
     restart: on-failure
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
     ports:
       - "5433:5432"
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "auth"]
+      test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 30s
       timeout: 30s
       retries: 3
+
 
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     restart: on-failure
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
     ports:
       - "5050:80"
       - "5051:443"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
 
   mailhog:
     image: mailhog/mailhog
-    container_name: mailhog2
+    container_name: mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
     volumes:
-      - mailhog:/var/lib/mailhog
+      - mailhog_data:/var/lib/mailhog
 
-  # redis-stack:
-  #   image: redis/redis-stack:latest
-  #   ports:
-  #     - "6379:6379"
-  #     - "8002:8001"
-  #   volumes:
-  #     - redis-stack:/var/lib/redis-stack
-  #   environment:
-  #     - REDIS_ARGS=--save 900 1
+
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_ARGS=--save 900 1
+
 
   # rabbitmq:
-  #   image: rabbitmq:3.8-management
+  #   image: rabbitmq:3.12-management
+  #   container_name: rabbitmq
   #   ports:
-  #     - "5672:5672" # RabbitMQ main port
-  #     - "15672:15672" # RabbitMQ management UI port
+  #     - "5672:5672"   # RabbitMQ default port
+  #     - "15672:15672" # Management UI port
   #   volumes:
   #     - rabbitmq_data:/var/lib/rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+  #     RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
 
-  # # ------------------------------------------
 
 volumes:
-  postgres:
-  mailhog:
-  # redis-stack:
+  postgres_data:
+  pgadmin_data:
+  mailhog_data:
+  redis_data:
   # rabbitmq_data:
-  # kong_data:
-

@@ -27,7 +27,7 @@ model History {
 
   inventoryId String
   inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
-
+  
   createdAt DateTime @default(now())
 }
 
