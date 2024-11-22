@@ -1,61 +1,69 @@
-// import amqp from 'amqplib';
-// import { defaultSender, transporter } from './config';
-// import prisma from './prisma';
+import amqp from "amqplib";
+import { defaultSender, RABBIT_MQ, transporter } from "./config";
+import prisma from "./prisma";
 
-// const receiveFromQueue = async (
-// 	queue: string,
-// 	callback: (message: string) => void
-// ) => {
-// 	const connection = await amqp.connect('amqp://localhost');
-// 	const channel = await connection.createChannel();
+const receiveFromQueue = async (
+  queue: string,
+  callback: (message: string) => void
+) => {
+	
+  const connection = await amqp.connect({
+    protocol: "amqp",
+    hostname: RABBIT_MQ.HOST,
+    port: RABBIT_MQ.PORT,
+    username: RABBIT_MQ.USER,
+    password: RABBIT_MQ.PASSWORD,
+  });
 
-// 	const exchange = 'order';
-// 	await channel.assertExchange(exchange, 'direct', { durable: true });
+  const channel = await connection.createChannel();
 
-// 	const q = await channel.assertQueue(queue, { durable: true });
-// 	await channel.bindQueue(q.queue, exchange, queue);
+  const exchange = "order";
+  await channel.assertExchange(exchange, "direct", { durable: true });
 
-// 	channel.consume(
-// 		q.queue,
-// 		(msg) => {
-// 			if (msg) {
-// 				callback(msg.content.toString());
-// 			}
-// 		},
-// 		{ noAck: true }
-// 	);
-// };
+  const q = await channel.assertQueue(queue, { durable: true });
+  await channel.bindQueue(q.queue, exchange, queue);
 
-// receiveFromQueue('send-email', async (msg) => {
-// 	const parsedBody = JSON.parse(msg);
+  channel.consume(
+    q.queue,
+    (msg) => {
+      if (msg) {
+        callback(msg.content.toString());
+      }
+    },
+    { noAck: true }
+  );
+};
 
-// 	const { userEmail, grandTotal, id } = parsedBody;
-// 	const from = defaultSender;
-// 	const subject = 'Order Confirmation';
-// 	const body = `Thank you for your order. Your order id is ${id}. Your order total is $${grandTotal}`;
+receiveFromQueue("send-email", async (msg) => {
+  const parsedBody = JSON.parse(msg);
 
-// 	const emailOption = {
-// 		from,
-// 		to: userEmail,
-// 		subject,
-// 		text: body,
-// 	};
+  const { userEmail, grandTotal, id } = parsedBody;
+  const from = defaultSender;
+  const subject = "Order Confirmation";
+  const body = `Thank you for your order. Your order id is ${id}. Your order total is $${grandTotal}`;
 
-// 	// send the email
-// 	const { rejected } = await transporter.sendMail(emailOption);
-// 	if (rejected.length) {
-// 		console.log('Email rejected: ', rejected);
-// 		return;
-// 	}
+  const emailOption = {
+    from,
+    to: userEmail,
+    subject,
+    text: body,
+  };
 
-// 	await prisma.email.create({
-// 		data: {
-// 			sender: from,
-// 			recipient: userEmail,
-// 			subject: 'Order Confirmation',
-// 			body,
-// 			source: 'OrderConfirmation',
-// 		},
-// 	});
-// 	console.log('Email sent');
-// });
+  // send the email
+  const { rejected } = await transporter.sendMail(emailOption);
+  if (rejected.length) {
+    console.log("Email rejected: ", rejected);
+    return;
+  }
+
+  await prisma.email.create({
+    data: {
+      sender: from,
+      recipient: userEmail,
+      subject: "Order Confirmation",
+      body,
+      source: "OrderConfirmation",
+    },
+  });
+  console.log("Email sent");
+});

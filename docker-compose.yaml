@@ -58,17 +58,17 @@ services:
       - REDIS_ARGS=--save 900 1
 
 
-  # rabbitmq:
-  #   image: rabbitmq:3.12-management
-  #   container_name: rabbitmq
-  #   ports:
-  #     - "5672:5672"   # RabbitMQ default port
-  #     - "15672:15672" # Management UI port
-  #   volumes:
-  #     - rabbitmq_data:/var/lib/rabbitmq
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-  #     RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # RabbitMQ default port
+      - "15672:15672" # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
 
 
 volumes:
@@ -76,4 +76,4 @@ volumes:
   pgadmin_data:
   mailhog_data:
   redis_data:
-  # rabbitmq_data:
+  rabbitmq_data:
