@@ -4,6 +4,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import "./events/onKeyExpires";
+import './receiver';
 import { addToCart, clearCart, getMyCart } from "./controllers";
 
 dotenv.config();

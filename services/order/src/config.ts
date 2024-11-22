@@ -11,3 +11,10 @@ export const PRODUCT_SERVICE =
 	process.env.PRODUCT_SERVICE_URL || 'http://localhost:4001';
 
 export const QUEUE_URL = process.env.QUEUE_URL || 'amqp://localhost';
+
+export const RABBIT_MQ = {
+  HOST: process.env.RABBIT_MQ_HOST || "localhost",
+  PORT: process.env.RABBIT_MQ_PORT ? process.env.RABBIT_MQ_PORT : 5672,
+  USER: process.env.RABBIT_MQ_USER || "admin",
+  PASSWORD: process.env.RABBIT_MQ_PASS || "admin",
+};
